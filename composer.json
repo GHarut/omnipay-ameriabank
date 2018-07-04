@@ -8,5 +8,10 @@
             "email": "karapetyan94hayk@gmail.com"
         }
     ],
+    "autoload": {
+        "psr-4": {
+            "Omnipay\\Ameriabank\\": "src/"
+        }
+    },
     "require": {}
 }
