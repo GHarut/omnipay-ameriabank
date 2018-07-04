@@ -15,8 +15,5 @@
     },
     "require": {
         "omnipay/common": "^3"
-    },
-    "require-dev": {
-        "omnipay/tests": "^3"
-    },
+    }
 }
