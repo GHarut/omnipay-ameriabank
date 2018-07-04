@@ -1,0 +1,12 @@
+{
+    "name": "hayko/omnipay-ameriabank",
+    "description": "Ameria Bank Package",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Hayk Karapetyan",
+            "email": "karapetyan94hayk@gmail.com"
+        }
+    ],
+    "require": {}
+}
