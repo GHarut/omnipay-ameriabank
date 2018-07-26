@@ -151,13 +151,13 @@ class Gateway extends AbstractGateway
 
 
     /**
-     * Sets the request OrderID.
+     * Sets the request TransactionId.
      *
      * @param string $value
      *
      * @return $this
      */
-    public function setOrderId($value)
+    public function setTransactionId($value)
     {
         return $this->setParameter('orderID', $value);
     }
@@ -167,8 +167,9 @@ class Gateway extends AbstractGateway
      * Get the request OrderID.
      * @return $this
      */
-    public function getOrderId()
+    public function getTransactionId()
     {
+        
         return $this->getParameter('orderID');
     }
 
@@ -187,12 +188,55 @@ class Gateway extends AbstractGateway
 
 
     /**
+     * Sets the request Amount
+     * @param $value
+     * @return mixed
+     */
+    public function setAmount($value)
+    {
+        return $this->setParameter('amount', $value);
+    }
+
+
+    /**
+     * Get Amount
+     * @return mixed
+     */
+    public function getAmount()
+    {
+        return $this->getParameter('amount');
+    }
+    
+    /**
      * Get the request password.
      * @return $this
      */
     public function getPassword()
     {
         return $this->getParameter('password');
+    }
+
+
+    /**
+     * Sets the request ReturnUrl.
+     *
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function setReturnUrl($value)
+    {
+        return $this->setParameter('returnUrl', $value);
+    }
+
+
+    /**
+     * Get the request ReturnUrl.
+     * @return $this
+     */
+    public function getReturnUrl()
+    {
+        return $this->getParameter('returnUrl');
     }
 
 

@@ -9,6 +9,45 @@ use Symfony\Component\HttpFoundation\ParameterBag;
  */
 class CompletePurchaseRequest extends PurchaseRequest
 {
+
+    /**
+     * Gateway payment Url
+     * @var string
+     */
+    protected $paymentUrl = 'https://payments.ameriabank.am/webservice/PaymentService.svc?wsdl';
+    protected $paymentTestUrl = 'https://testpayments.ameriabank.am/webservice/PaymentService.svc?wsdl';
+
+
+    /**
+     * get payment Url
+     * @return string
+     */
+    public function getPaymentUrl()
+    {
+        return $this->getTestMode() ? $this->paymentTestUrl : $this->paymentUrl;
+    }
+
+
+    /**
+     * @param $value
+     * @return $this
+     */
+    public function setAmount($value)
+    {
+        return $this->setParameter('amount', $value);
+    }
+
+
+    /**
+     * Get Amount
+     * @return mixed
+     */
+    public function getAmount()
+    {
+        return $this->getParameter('amount');
+    }
+
+
     /**
      * Prepare and get data
      * @return mixed|void
@@ -28,28 +67,7 @@ class CompletePurchaseRequest extends PurchaseRequest
      */
     public function sendData($data)
     {
-        return $this->response = new CompletePurchaseResponse($this, $data);
-    }
-
-
-    /**
-     * Get Payment Fields Ameria Bank
-     * @return mixed
-     * @throws \Omnipay\Common\Exception\InvalidRequestException
-     */
-    public function getPaymentFields()
-    {
-        $data = [
-            'OrderID'       => $this->getOrderId(),
-            'Username'      => $this->getUsername(),
-            'Password'      => $this->getPassword(),
-            'ClientID'      => $this->getClientId(),
-            'PaymentAmount' => $this->getAmount(),
-            'testMode'      => $this->getTestMode()
-        ];
-
-        $response = new CompletePurchaseResponse($this, $data);;
-        return $this->response = $response->getPaymentFields();
+        return $this->response = new CompletePurchaseResponse($this, $this->getPaymentFieldsResult($data));
     }
 
 
@@ -74,5 +92,30 @@ class CompletePurchaseRequest extends PurchaseRequest
             $data['success'] = true;
         }
         return $data;
+    }
+
+
+    /**
+     * Get Payment Fields Ameria Bank
+     * @return mixed
+     */
+    protected function getPaymentFieldsResult($data)
+    {
+        $client = new \SoapClient($this->getPaymentUrl(), [
+            'soap_version'    => SOAP_1_1,
+            'exceptions'      => true,
+            'trace'           => 1,
+            'wsdl_local_copy' => true
+        ]);
+
+        $args['paymentfields'] = array(
+            'OrderID'       => $data['orderID'],
+            'Username'      => $this->getUsername(),
+            'Password'      => $this->getPassword(),
+            'ClientID'      => $this->getClientId(),
+            'PaymentAmount' => $this->getAmount(),
+        );
+        
+        return $client->GetPaymentFields($args);
     }
 }

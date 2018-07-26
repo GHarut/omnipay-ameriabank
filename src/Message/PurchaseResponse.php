@@ -9,12 +9,14 @@ use Omnipay\Common\Message\RedirectResponseInterface;
  */
 class PurchaseResponse extends AbstractResponse implements RedirectResponseInterface
 {
+
     /**
      * Gateway payment Url
      * @var string
      */
     protected $paymentUrl = 'https://payments.ameriabank.am/webservice/PaymentService.svc?wsdl';
     protected $paymentTestUrl = 'https://testpayments.ameriabank.am/webservice/PaymentService.svc?wsdl';
+
 
     /**
      * Gateway $endpoint
@@ -52,16 +54,6 @@ class PurchaseResponse extends AbstractResponse implements RedirectResponseInter
     {
         return $this->data['testMode'] ? $this->endpointTest.'?'.http_build_query($this->getRedirectData())
                                        : $this->endpoint.'?'.http_build_query($this->getRedirectData());
-    }
-
-
-    /**
-     * get payment Url
-     * @return string
-     */
-    public function getPaymentUrl()
-    {
-        return $this->data['testMode'] ? $this->paymentTestUrl : $this->paymentUrl;
     }
 
 
@@ -109,7 +101,7 @@ class PurchaseResponse extends AbstractResponse implements RedirectResponseInter
             'Currency'      => $this->data['Currency'],
             'PaymentAmount' => $this->data['PaymentAmount'],
         );
-
+        dd($args);
         return $webService = $client->GetPaymentID($args);
     }
 }

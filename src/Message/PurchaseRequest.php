@@ -11,6 +11,15 @@ class PurchaseRequest extends AbstractRequest
 {
 
     /**
+     * Gateway payment Url
+     * @var string
+     */
+    protected $paymentUrl = 'https://payments.ameriabank.am/webservice/PaymentService.svc?wsdl';
+    
+    protected $paymentTestUrl = 'https://testpayments.ameriabank.am/webservice/PaymentService.svc?wsdl';
+
+
+    /**
      * Currency ISO codes.
      *
      * @var array
@@ -21,6 +30,7 @@ class PurchaseRequest extends AbstractRequest
         'EUR' => '978',
         'RUB' => '643'
     ];
+
 
     /**
      * Sets the request language.
@@ -115,26 +125,27 @@ class PurchaseRequest extends AbstractRequest
 
 
     /**
-     * Sets the request OrderID.
+     * Sets the request TransactionId.
      *
      * @param string $value
      *
      * @return $this
      */
-    public function setOrderId($value)
+    public function setTransactionId($value)
     {
         return $this->setParameter('orderID', $value);
     }
 
 
     /**
-     * Get the request OrderID.
+     * Get the request TransactionId.
      * @return $this
      */
-    public function getOrderId()
+    public function getTransactionId()
     {
         return $this->getParameter('orderID');
     }
+
 
 
     /**
@@ -184,6 +195,16 @@ class PurchaseRequest extends AbstractRequest
 
 
     /**
+     * get payment Url
+     * @return string
+     */
+    public function getPaymentUrl()
+    {
+        return $this->getTestMode() ? $this->paymentTestUrl : $this->paymentUrl;
+    }
+
+
+    /**
      * Sets the request ClientUrl.
      *
      * @param $value
@@ -217,7 +238,7 @@ class PurchaseRequest extends AbstractRequest
         return [
             'Opaque'        => $this->getOpaque(),
             'backURL'       => $this->getReturnUrl(),
-            'OrderID'       => $this->getOrderId(),
+            'OrderID'       => $this->getTransactionId(),
             'Username'      => $this->getUsername(),
             'Password'      => $this->getPassword(),
             'ClientID'      => $this->getClientId(),
@@ -230,15 +251,24 @@ class PurchaseRequest extends AbstractRequest
             'testMode'      => $this->getTestMode()
         ];
     }
+
+
     /**
      * Send data and return response instance
-     *
-     * @param mixed $data
-     *
-     * @return \Omnipay\Common\Message\ResponseInterface|\Omnipay\Ameriabank\Message\PurchaseResponse
+     * @param $data
+     * @return PurchaseResponse
+     * @throws \Omnipay\Common\Exception\InvalidRequestException
      */
     public function sendData($data)
     {
+        $payment = $this->createPaymentRequest($data);
+        if (empty($payment->GetPaymentIDResult->PaymentID) || $payment->GetPaymentIDResult->Respmessage != 'OK') {
+            return $payment->GetPaymentIDResult;
+        } else {
+            
+            $data['PaymentId'] = $payment->GetPaymentIDResult->PaymentID;
+        }
+
         return $this->response = new PurchaseResponse($this, $data);
     }
 
@@ -248,24 +278,20 @@ class PurchaseRequest extends AbstractRequest
      * @return mixed
      * @throws \Omnipay\Common\Exception\InvalidRequestException
      */
-    public function createPaymentRequest()
+    protected function createPaymentRequest($data)
     {
-        $data = [
-            'Opaque'        => $this->getOpaque(),
-            'backURL'       => $this->getReturnUrl(),
-            'OrderID'       => $this->getOrderId(),
-            'Username'      => $this->getUsername(),
-            'Password'      => $this->getPassword(),
-            'ClientID'      => $this->getClientId(),
-            'Description'   => $this->getDescription(),
-            'Currency'      => self::$currencyISOCodes[$this->getCurrency()],
-            'PaymentAmount' => $this->getAmount(),
-            'testMode'      => $this->getTestMode()
+        $args['paymentfields'] = $data;
 
-        ];
+        $client = new \SoapClient($this->getPaymentUrl(), [
+            'soap_version'    => SOAP_1_1,
+            'exceptions'      => true,
+            'trace'           => 1,
+            'wsdl_local_copy' => true
+        ]);
 
-        $response = new PurchaseResponse($this, $data);
-        return $this->response = $response->createPaymentRequest();
+
+        return $webService = $client->GetPaymentID($args);
     }
+
 
 }

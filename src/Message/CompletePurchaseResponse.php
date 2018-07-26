@@ -9,56 +9,31 @@ class CompletePurchaseResponse extends AbstractResponse
 {
 
     /**
-     * Gateway payment Url
-     * @var string
-     */
-    protected $paymentUrl = 'https://payments.ameriabank.am/webservice/PaymentService.svc?wsdl';
-    protected $paymentTestUrl = 'https://testpayments.ameriabank.am/webservice/PaymentService.svc?wsdl';
-
-
-    /**
      * Indicates whether transaction was successful
      * @return bool
      */
     public function isSuccessful()
     {
-        return !empty($this->data['success']);
+        return $this->data->GetPaymentFieldsResult->respcode == '00';
     }
 
-
     /**
-     * get payment Url
+     * Get TransactionId
      * @return string
      */
-    public function getPaymentUrl()
+    public function getTransactionId()
     {
-        return $this->data['testMode'] ? $this->paymentTestUrl : $this->paymentUrl;
+        return $this->data->GetPaymentFieldsResult->orderid ?? '';
     }
 
 
     /**
-     * Get Payment Fields Ameria Bank
-     * @return mixed
+     * Get
+     * @return null|string
      */
-    public function getPaymentFields()
+    public function getTransactionReference()
     {
-        $client = new \SoapClient($this->getPaymentUrl(), [
-            'soap_version'    => SOAP_1_1,
-            'exceptions'      => true,
-            'trace'           => 1,
-            'wsdl_local_copy' => true
-        ]);
-
-
-        $args['paymentfields'] = array(
-            'OrderID'       => $this->data['OrderID'],
-            'Username'      => $this->data['Username'],
-            'Password'      => $this->data['Password'],
-            'ClientID'      => $this->data['ClientID'],
-            'PaymentAmount' => $this->data['PaymentAmount'],
-        );
-
-        return $client->GetPaymentFields($args);
+        return $this->data->GetPaymentFieldsResult->rrn ?? '';
     }
 
 }
