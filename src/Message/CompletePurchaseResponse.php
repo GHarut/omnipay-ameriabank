@@ -36,4 +36,14 @@ class CompletePurchaseResponse extends AbstractResponse
         return $this->data->GetPaymentFieldsResult->rrn ?? '';
     }
 
+
+    /**
+     * Get Message
+     * @return null|string
+     */
+    public function getMessage()
+    {
+        return $this->data->GetPaymentFieldsResult->descr;
+    }
+
 }

@@ -287,6 +287,51 @@ class Gateway extends AbstractGateway
 
 
     /**
+     * Sets the request CardHolderId.
+     *
+     * @param $value
+     *
+     * @return $this
+     */
+    public function setCardHolderId($value)
+    {
+        return $this->setParameter('CardHolderId', $value);
+    }
+
+
+    /**
+     * Get the request CardHolderId.
+     * @return $this
+     */
+    public function getCardHolderID()
+    {
+        return $this->getParameter('CardHolderId');
+    }
+
+    /**
+     * Sets the request binding purchase.
+     *
+     * @param $value
+     *
+     * @return $this
+     */
+    public function setBindingPurchase($value)
+    {
+        return $this->setParameter('bindingPurchase', $value);
+    }
+
+
+    /**
+     * Get the request binding purchase.
+     * @return $this
+     */
+    public function getBindingPurchase()
+    {
+        return $this->getParameter('bindingPurchase');
+    }
+
+
+    /**
      * Create a purchase request
      *
      * @param array $options

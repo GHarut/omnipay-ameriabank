@@ -18,6 +18,14 @@ class PurchaseRequest extends AbstractRequest
     
     protected $paymentTestUrl = 'https://testpayments.ameriabank.am/webservice/PaymentService.svc?wsdl';
 
+    /**
+     * Gateway Card Bindings Url
+     * @var string
+     */
+    protected $cardBindingsUrl = 'https://payments.ameriabank.am/webservice/CardBindings.svc?wsdl';
+
+    protected $cardBindingsTestUrl = 'https://testpayments.ameriabank.am/webservice/CardBindings.svc?wsdl';
+
 
     /**
      * Currency ISO codes.
@@ -205,6 +213,16 @@ class PurchaseRequest extends AbstractRequest
 
 
     /**
+     * get Card Bindings Url
+     * @return mixed
+     */
+    public function getCardBindingsUrl()
+    {
+        return $this->getTestMode() ? $this->cardBindingsTestUrl : $this->cardBindingsUrl;
+    }
+
+
+    /**
      * Sets the request ClientUrl.
      *
      * @param $value
@@ -228,6 +246,52 @@ class PurchaseRequest extends AbstractRequest
 
 
     /**
+     * Sets the request CardHolderId.
+     *
+     * @param $value
+     *
+     * @return $this
+     */
+    public function setCardHolderId($value)
+    {
+        return $this->setParameter('CardHolderID', $value);
+    }
+
+
+    /**
+     * Get the request CardHolderId.
+     * @return $this
+     */
+    public function getCardHolderId()
+    {
+        return $this->getParameter('CardHolderID');
+    }
+
+
+    /**
+     * Sets the request binding purchase.
+     *
+     * @param $value
+     *
+     * @return $this
+     */
+    public function setBindingPurchase($value)
+    {
+        return $this->setParameter('bindingPurchase', $value);
+    }
+
+
+    /**
+     * Get the request binding purchase.
+     * @return $this
+     */
+    public function getBindingPurchase()
+    {
+        return $this->getParameter('bindingPurchase');
+    }
+
+
+    /**
      * Prepare data to send
      * @return array|mixed
      * @throws \Omnipay\Common\Exception\InvalidRequestException
@@ -236,19 +300,21 @@ class PurchaseRequest extends AbstractRequest
     {
         $this->validate('clientId', 'username', 'password');
         return [
-            'Opaque'        => $this->getOpaque(),
-            'backURL'       => $this->getReturnUrl(),
-            'OrderID'       => $this->getTransactionId(),
-            'Username'      => $this->getUsername(),
-            'Password'      => $this->getPassword(),
-            'ClientID'      => $this->getClientId(),
-            'Description'   => $this->getDescription(),
-            'Currency'      => self::$currencyISOCodes[$this->getCurrency()],
-            'PaymentAmount' => $this->getAmount(),
-            'clienturl'     => $this->getClientUrl(),
-            'paymentid'     => $this->getPaymentId(),
-            'lang'          => $this->getLanguage(),
-            'testMode'      => $this->getTestMode()
+            'Opaque'            => $this->getOpaque(),
+            'backURL'           => $this->getReturnUrl(),
+            'OrderID'           => $this->getTransactionId(),
+            'Username'          => $this->getUsername(),
+            'Password'          => $this->getPassword(),
+            'ClientID'          => $this->getClientId(),
+            'Description'       => $this->getDescription(),
+            'Currency'          => self::$currencyISOCodes[$this->getCurrency()],
+            'PaymentAmount'     => $this->getAmount(),
+            'clienturl'         => $this->getClientUrl(),
+            'paymentid'         => $this->getPaymentId(),
+            'lang'              => $this->getLanguage(),
+            'testMode'          => $this->getTestMode(),
+            'CardHolderID'      => $this->getCardHolderId(),
+            'bindingPurchase'   => $this->getBindingPurchase(),
         ];
     }
 
@@ -261,15 +327,29 @@ class PurchaseRequest extends AbstractRequest
      */
     public function sendData($data)
     {
-        $payment = $this->createPaymentRequest($data);
-        if (empty($payment->GetPaymentIDResult->PaymentID) || $payment->GetPaymentIDResult->Respmessage != 'OK') {
-            return $payment->GetPaymentIDResult;
-        } else {
-            
-            $data['PaymentId'] = $payment->GetPaymentIDResult->PaymentID;
-        }
 
-        return $this->response = new PurchaseResponse($this, $data);
+        if (!empty($data['bindingPurchase']) && !empty($data['CardHolderID'])) {
+
+            $payment = $this->createBindingRequest($data);
+
+            if ($payment->DoBindingTransactionResult->respcode == '00') {
+                $data['PaymentId'] = $payment->DoBindingTransactionResult->rrn;
+            }
+
+            $data['message'] = $payment->DoBindingTransactionResult->descr;
+
+            return $this->response = new PurchaseResponse($this, $data);
+        } else {
+            $payment = $this->createPaymentRequest($data);
+
+            if (!empty($payment->GetPaymentIDResult->PaymentID) && $payment->GetPaymentIDResult->Respmessage == 'OK') {
+                $data['PaymentId'] = $payment->GetPaymentIDResult->PaymentID;
+            }
+
+            $data['message'] = $payment->GetPaymentIDResult->Respmessage;
+
+            return $this->response = new PurchaseResponse($this, $data);
+        }
     }
 
 
@@ -289,8 +369,26 @@ class PurchaseRequest extends AbstractRequest
             'wsdl_local_copy' => true
         ]);
 
-
         return $webService = $client->GetPaymentID($args);
+    }
+
+
+    /**
+     * Create Do Binding Transaction Ameria Bank
+     * @param $data
+     * @return mixed
+     */
+    protected function createBindingRequest($data)
+    {
+        $args['payclient'] = $data;
+        $client = new \SoapClient($this->getCardBindingsUrl(), [
+            'soap_version'    => SOAP_1_1,
+            'exceptions'      => true,
+            'trace'           => 1,
+            'wsdl_local_copy' => true
+        ]);
+
+        return $webService = $client->DoBindingTransaction($args);
     }
 
 
