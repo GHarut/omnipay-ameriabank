@@ -2,6 +2,7 @@
 namespace Omnipay\Ameriabank;
 
 
+use Omnipay\Ameriabank\Message\RefundRequest;
 use Omnipay\Common\Http\ClientInterface;
 use Omnipay\Common\AbstractGateway;
 use Omnipay\Ameriabank\Message\CompletePurchaseRequest;
@@ -13,7 +14,6 @@ use Symfony\Component\HttpFoundation\Request as HttpRequest;
  * @method \Omnipay\Common\Message\RequestInterface authorize(array $options = array())
  * @method \Omnipay\Common\Message\RequestInterface completeAuthorize(array $options = array())
  * @method \Omnipay\Common\Message\RequestInterface capture(array $options = array())
- * @method \Omnipay\Common\Message\RequestInterface refund(array $options = array())
  * @method \Omnipay\Common\Message\RequestInterface void(array $options = array())
  * @method \Omnipay\Common\Message\RequestInterface createCard(array $options = array())
  * @method \Omnipay\Common\Message\RequestInterface updateCard(array $options = array())
@@ -356,12 +356,23 @@ class Gateway extends AbstractGateway
         return $this->createRequest(CompletePurchaseRequest::class, $options);
     }
 
+    /**
+     * Refund Request
+     *
+     * @param array $options
+     *
+     * @return \Omnipay\Common\Message\AbstractRequest|\Omnipay\Common\Message\RequestInterface
+     */
+    public function refund(array $options = array())
+    {
+        return $this->createRequest(RefundRequest::class, $options);
+    }
+
     public function __call($name, $arguments)
     {
         // TODO: Implement @method \Omnipay\Common\Message\RequestInterface authorize(array $options = array())
         // TODO: Implement @method \Omnipay\Common\Message\RequestInterface completeAuthorize(array $options = array())
         // TODO: Implement @method \Omnipay\Common\Message\RequestInterface capture(array $options = array())
-        // TODO: Implement @method \Omnipay\Common\Message\RequestInterface refund(array $options = array())
         // TODO: Implement @method \Omnipay\Common\Message\RequestInterface void(array $options = array())
         // TODO: Implement @method \Omnipay\Common\Message\RequestInterface createCard(array $options = array())
         // TODO: Implement @method \Omnipay\Common\Message\RequestInterface updateCard(array $options = array())
