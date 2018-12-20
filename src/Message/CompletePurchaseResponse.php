@@ -33,7 +33,7 @@ class CompletePurchaseResponse extends AbstractResponse
      */
     public function getTransactionReference()
     {
-        return $this->data->GetPaymentFieldsResult->rrn ?? '';
+        return $this->getTransactionId();
     }
 
 
