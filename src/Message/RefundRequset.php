@@ -18,7 +18,7 @@ class RefundRequest extends AbstractRequest
      */
     protected $refundUrl = 'https://payments.ameriabank.am/webservice/PaymentService.svc?wsdl';
 
-    protected $refundTestUrl = 'https://payments.ameriabank.am/webservice/PaymentService.svc?wsdl';
+    protected $refundTestUrl = 'https://testpayments.ameriabank.am/webservice/PaymentService.svc?wsdl';
 
     /**
      * Get payment Url
