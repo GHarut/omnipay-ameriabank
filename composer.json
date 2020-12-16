@@ -1,11 +1,11 @@
 {
-    "name": "haykkarapetyan/omnipay-ameriabank",
+    "name": "gharut/omnipay-ameriabank",
     "description": "Ameria Bank Package",
     "license": "MIT",
     "authors": [
         {
-            "name": "Hayk Karapetyan",
-            "email": "karapetyan94hayk@gmail.com"
+            "name": "Gabrielyan Harutyun",
+            "email": "harut.gabrielian@gmail.com"
         }
     ],
     "autoload": {
